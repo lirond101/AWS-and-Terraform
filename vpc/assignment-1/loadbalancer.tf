@@ -16,13 +16,6 @@ resource "aws_lb" "nginx" {
   subnets            = module.vpc.public_subnets
 
   enable_deletion_protection = false
-
-  # access_logs {
-  #   bucket  = module.web_app_s3.web_bucket.id
-  #   prefix  = "alb-logs"
-  #   enabled = true
-  # }
-
   tags = local.common_tags
 }
 

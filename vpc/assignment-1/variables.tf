@@ -1,7 +1,7 @@
 variable "naming_prefix" {
   type        = string
   description = "Naming prefix for resources"
-  default     = "globoweb"
+  default     = "ass1"
 }
 
 variable "aws_region" {
@@ -49,17 +49,12 @@ variable "instance_count" {
 variable "company" {
   type        = string
   description = "Company name for resource tagging"
-  default     = "Globomantics"
+  default     = "Opsschool"
 }
 
 variable "project" {
   type        = string
   description = "Project name for resource tagging"
-}
-
-variable "billing_code" {
-  type        = string
-  description = "Billing code for resource tagging"
 }
 
 variable "ubuntu_account_number" {
