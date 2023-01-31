@@ -9,113 +9,137 @@ data "aws_availability_zones" "available" {}
 ##################################################################################
 
 # NETWORKING #
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
 
-  cidr            = var.vpc_cidr_block
-  azs             = slice(data.aws_availability_zones.available.names, 0, (var.vpc_subnet_count))
-  public_subnets   = ["10.1.0.0/24", "10.1.2.0/24"]
-  private_subnets  = ["10.1.1.0/24", "10.1.3.0/24"]
-  enable_nat_gateway      = true
+# vpc
+resource "aws_vpc" "my_vpc" {
+  cidr_block       = var.vpc_cidr_block
   enable_dns_hostnames    = var.enable_dns_hostnames
-  map_public_ip_on_launch = var.map_public_ip_on_launch
 
   tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-vpc"
   })
-
 }
 
-# SECURITY GROUPS #
-# ALB Security Group
-resource "aws_security_group" "alb_sg" {
-  name   = "${local.name_prefix}-nginx_alb_sg"
-  vpc_id = module.vpc.vpc_id
 
-  #Allow HTTP from anywhere
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+resource "aws_subnet" "public_subnet" {
+  depends_on = [
+      aws_vpc.my_vpc,
+    ]
+
+  count = 2
+  cidr_block = var.public_subnets[count.index]
+  availability_zone = var.availability_zone[count.index]
+  vpc_id = aws_vpc.my_vpc.id
+  map_public_ip_on_launch = var.map_public_ip_on_launch
+  tags = {
+    # Name = "${cidr_block}-${availability_zone.name}-${count.index+1}"
+    Name = "public-subnet-${count.index+1}"
   }
-
-  #allow all outbound
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = local.common_tags
-
 }
 
-# Nginx security group 
-resource "aws_security_group" "nginx-sg" {
-  name   = "${local.name_prefix}-nginx_sg"
-  vpc_id = module.vpc.vpc_id
+resource "aws_subnet" "private_subnet" {
+  depends_on = [
+      aws_vpc.my_vpc,
+    ]
 
-  # HTTP access from VPC
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr_block]
+  count = 2
+  cidr_block = var.private_subnets[count.index]
+  availability_zone = var.availability_zone[count.index]
+  vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    # Name = "${cidr_block}-${availability_zone.name}-${count.index+1}"
+    Name = "private-subnet-${count.index+1}"
   }
-
-  # SSH access from outside
-  ingress {
-    description = "allow SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # outbound internet access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = local.common_tags
 }
 
-# DB security group 
-resource "aws_security_group" "db-sg" {
-  name   = "${local.name_prefix}-db_sg"
-  vpc_id = module.vpc.vpc_id
+resource "aws_internet_gateway" "igw" {
+  depends_on = [
+      aws_vpc.my_vpc,
+    ]
 
-  # HTTP access from public subnets
-  ingress {
-    description = "allow Http"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/24", "10.1.2.0/24"]
+  vpc_id = aws_vpc.my_vpc.id
+  tags = {
+    Name = "${local.name_prefix}-igw"
   }
-
-  # SSH access from public subnets
-  ingress {
-    description = "allow SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.1.0.0/24", "10.1.2.0/24"]
-  }
-
-  # outbound internet access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = local.common_tags
 }
+
+resource "aws_route_table" "IG_route_table" {
+  depends_on = [
+      aws_vpc.my_vpc,
+    ]
+
+  vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "${local.name_prefix}-IG-rt"
+  }
+}
+
+resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
+  depends_on = [
+    aws_subnet.public_subnet,
+    aws_route_table.IG_route_table,
+  ]
+
+  count = 2
+  route_table_id = aws_route_table.IG_route_table.id
+  subnet_id = aws_subnet.public_subnet.*.id[count.index]
+}
+
+# elastic ip
+resource "aws_eip" "elastic_ip" {
+  count = 2
+  vpc   = true
+}
+
+# NAT gateway
+resource "aws_nat_gateway" "nat_gateway" {
+  depends_on = [
+    aws_subnet.public_subnet,
+    aws_eip.elastic_ip,
+  ]
+  count         = 2
+  allocation_id = aws_eip.elastic_ip.*.id[count.index]
+  subnet_id     = aws_subnet.public_subnet.*.id[count.index]
+
+  tags = {
+    Name = "${local.name_prefix}-nat-gateway-${count.index+1}"
+  }
+}
+
+# route table with target as NAT gateway
+resource "aws_route_table" "NAT_route_table" {
+  depends_on = [
+    aws_vpc.my_vpc,
+    aws_nat_gateway.nat_gateway,
+    ]
+
+  vpc_id = aws_vpc.my_vpc.id
+  count = 2
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat_gateway.*.id[count.index]
+  }
+
+  tags = {
+    Name = "${local.name_prefix}-NAT-rt-${count.index+1}"
+  }
+}
+
+# associate route table to private subnet
+resource "aws_route_table_association" "associate_routetable_to_private_subnet" {
+  depends_on = [
+    aws_subnet.private_subnet,
+    aws_route_table.NAT_route_table,
+  ]
+
+  count          = 2
+  subnet_id      = aws_subnet.private_subnet.*.id[count.index]
+  route_table_id = aws_route_table.NAT_route_table.*.id[count.index]
+}
+

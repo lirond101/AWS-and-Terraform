@@ -61,3 +61,23 @@ variable "ubuntu_account_number" {
   default = "099720109477"
   type    = string
 }
+
+variable "public_subnets" {
+  type = list(string)
+}
+variable "private_subnets" {
+  type = list(string)
+}
+variable "availability_zone" {
+  type = list(string)
+}
+
+# key variable for refrencing 
+variable "key_name" {
+  default = "ec2Key"
+}
+
+# base_path for refrencing 
+variable "base_path" {
+  default = "/home/ec2-user/Getting-Started-Terraform/check"
+}
