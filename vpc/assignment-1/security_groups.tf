@@ -68,7 +68,7 @@ resource "aws_security_group" "db-sg" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-  
+
   name   = "${local.name_prefix}-db_sg"
   vpc_id = aws_vpc.my_vpc.id
 

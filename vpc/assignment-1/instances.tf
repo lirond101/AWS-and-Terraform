@@ -21,11 +21,11 @@ resource "aws_instance" "nginx" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private_subnet.*.id[count.index]
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
-  key_name = var.key_name
+  key_name               = var.key_name
   user_data              = local.my-instance-userdata
 
   tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-nginx-${count.index+1}"
+    Name = "${local.name_prefix}-nginx-${count.index + 1}"
   })
 }
 
@@ -42,9 +42,9 @@ resource "aws_instance" "db" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private_subnet.*.id[count.index]
   vpc_security_group_ids = [aws_security_group.db-sg.id]
-  key_name = var.key_name
+  key_name               = var.key_name
 
   tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-db-${count.index+1}"
+    Name = "${local.name_prefix}-db-${count.index + 1}"
   })
 }

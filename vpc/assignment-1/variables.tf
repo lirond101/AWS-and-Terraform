@@ -71,15 +71,15 @@ variable "private_subnets" {
 variable "availability_zone" {
   type = list(string)
 }
- 
+
 variable "key_name" {
   type        = string
   description = "key variable for refrencing"
-  default = "ec2Key"
+  default     = "ec2Key"
 }
 
 variable "base_path" {
   type        = string
   description = "Base path for referencing"
-  default = "/home/ec2-user/AWS-and-Terraform/vpc/assignment-1/"
+  default     = "/home/ec2-user/AWS-and-Terraform/vpc/assignment-1/"
 }
