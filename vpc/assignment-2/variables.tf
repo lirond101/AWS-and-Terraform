@@ -65,3 +65,8 @@ variable "availability_zone" {
   description = "Desired AZs as list of strings"
 }
 
+variable "s3_bucket_name" {
+  type = list(string)
+  description = "S3 bucket name"
+  default = "opsschoolbucket12378123"
+}

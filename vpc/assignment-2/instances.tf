@@ -23,6 +23,8 @@ resource "aws_instance" "nginx" {
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
   key_name               = var.key_name
   user_data              = local.my-instance-userdata
+  iam_instance_profile   = module.web_app_s3.instance_profile.name
+
 
   tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-nginx-${count.index+1}"
