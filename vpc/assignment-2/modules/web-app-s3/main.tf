@@ -53,7 +53,6 @@ EOF
 
 resource "aws_s3_bucket" "web_bucket" {
   bucket        = var.bucket_name
-  acl           = "private"
   force_destroy = true
 
   policy = <<POLICY
@@ -95,4 +94,9 @@ resource "aws_s3_bucket" "web_bucket" {
 
   tags = var.common_tags
 
+}
+
+resource "aws_s3_bucket_acl" "web_bucket_acl" {
+  bucket = aws_s3_bucket.web_bucket.id
+  acl    = "private"
 }

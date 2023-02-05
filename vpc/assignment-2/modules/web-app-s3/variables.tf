@@ -1,7 +1,6 @@
 variable "bucket_name" {
   type        = string
   description = "Name of the S3 bucket to create"
-  default = "opsschoolbucket12378123"
 }
 
 variable "elb_service_account_arn" {

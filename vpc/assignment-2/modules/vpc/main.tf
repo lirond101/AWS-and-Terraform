@@ -77,6 +77,10 @@ resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
 resource "aws_eip" "elastic_ip" {
   count = 2
   vpc   = true
+
+  tags = {
+    Name = "${var.naming_prefix}-eip-${count.index+1}"
+  }
 }
 
 # NAT gateway

@@ -11,7 +11,7 @@ terraform {
   }
   backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "vpc-assig-opsschool-04022023-terraform-state"
+    bucket         = "vpc-assig-opsschool-050220231217-tfstate"
     key            = "global/s3/terraform.tfstate"
     region         = "us-east-1"
 
