@@ -116,7 +116,7 @@ resource "aws_route_table" "NAT_route_table" {
   ]
 
   vpc_id = aws_vpc.vpc.id
-  # count  = 2
+  count  = 2
   # route {
   #   cidr_block = "0.0.0.0/0"
   #   gateway_id = aws_nat_gateway.nat_gateway.*.id[count.index]
@@ -132,7 +132,7 @@ resource "aws_route" "nat-default-route" {
     aws_route_table.NAT_route_table,
   ]
   count  = 2
-  route_table_id         = aws_route_table.NAT_route_table.id
+  route_table_id         = aws_route_table.NAT_route_table.*.id[count.index]
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_nat_gateway.nat_gateway.*.id[count.index]
 }
