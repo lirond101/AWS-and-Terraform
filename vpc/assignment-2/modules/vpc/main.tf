@@ -52,13 +52,22 @@ resource "aws_route_table" "IG_route_table" {
   ]
 
   vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
+  # route {
+  #   cidr_block = "0.0.0.0/0"
+  #   gateway_id = aws_internet_gateway.igw.id
+  # }
   tags = {
     Name = "${var.naming_prefix}-IG-rt"
   }
+}
+
+resource "aws_route" "ngw-default-route" {
+    depends_on = [
+    aws_route_table.IG_route_table,
+  ]
+  route_table_id         = aws_route_table.IG_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
 }
 
 # associate route table to public subnet
@@ -107,15 +116,25 @@ resource "aws_route_table" "NAT_route_table" {
   ]
 
   vpc_id = aws_vpc.vpc.id
-  count  = 2
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.nat_gateway.*.id[count.index]
-  }
+  # count  = 2
+  # route {
+  #   cidr_block = "0.0.0.0/0"
+  #   gateway_id = aws_nat_gateway.nat_gateway.*.id[count.index]
+  # }
 
   tags = {
     Name = "${var.naming_prefix}-NAT-rt-${count.index+1}"
   }
+}
+
+resource "aws_route" "nat-default-route" {
+  depends_on = [
+    aws_route_table.NAT_route_table,
+  ]
+  count  = 2
+  route_table_id         = aws_route_table.NAT_route_table.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_nat_gateway.nat_gateway.*.id[count.index]
 }
 
 # associate route table to private subnet

@@ -41,6 +41,11 @@ resource "aws_lb_target_group" "nginx" {
     interval            = 5
     matcher             = "200"
   }
+
+  stickiness {
+    cookie_duration = "60"
+    type = "lb_cookie"
+  }
 }
 
 resource "aws_lb_listener" "nginx" {

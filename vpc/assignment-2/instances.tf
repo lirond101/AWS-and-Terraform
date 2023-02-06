@@ -13,14 +13,14 @@ data "aws_ssm_parameter" "ami" {
 # INSTANCES #
 resource "aws_instance" "nginx" {
   depends_on = [
-    aws_security_group.nginx-sg,
+    aws_security_group.nginx_sg,
   ]
 
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type
   subnet_id              = keys(module.my_vpc.vpc_private_subnets)[count.index]
-  vpc_security_group_ids = [aws_security_group.nginx-sg.id]
+  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
   associate_public_ip_address = "true"
   key_name               = var.key_name
   iam_instance_profile   = module.web_app_s3.instance_profile.name
@@ -41,7 +41,7 @@ resource "aws_instance" "nginx" {
 
 resource "aws_instance" "db" {
   depends_on = [
-    aws_security_group.db-sg,
+    aws_security_group.db_sg,
     module.my_vpc
   ]
 
@@ -49,7 +49,7 @@ resource "aws_instance" "db" {
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type
   subnet_id              = keys(module.my_vpc.vpc_private_subnets)[count.index]
-  vpc_security_group_ids = [aws_security_group.db-sg.id]
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
   key_name               = var.key_name
 
   tags = merge(local.common_tags, {
