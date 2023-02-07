@@ -14,7 +14,6 @@ resource "aws_lb" "nginx" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [for subnet in aws_subnet.public_subnet.*.id : subnet]
-
   enable_deletion_protection = false
 
   tags = local.common_tags

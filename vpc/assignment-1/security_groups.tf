@@ -4,7 +4,6 @@ resource "aws_security_group" "alb_sg" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-
   name   = "${local.name_prefix}-nginx_alb_sg"
   vpc_id = aws_vpc.my_vpc.id
 
@@ -32,7 +31,6 @@ resource "aws_security_group" "nginx-sg" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-
   name   = "${local.name_prefix}-nginx_sg"
   vpc_id = aws_vpc.my_vpc.id
 
@@ -68,7 +66,6 @@ resource "aws_security_group" "db-sg" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-
   name   = "${local.name_prefix}-db_sg"
   vpc_id = aws_vpc.my_vpc.id
 

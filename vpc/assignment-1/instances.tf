@@ -15,7 +15,6 @@ resource "aws_instance" "nginx" {
   depends_on = [
     aws_security_group.nginx-sg,
   ]
-
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type
@@ -36,7 +35,6 @@ resource "aws_instance" "db" {
     aws_nat_gateway.nat_gateway,
     aws_route_table_association.associate_routetable_to_private_subnet
   ]
-
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type

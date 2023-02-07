@@ -25,14 +25,12 @@ resource "aws_subnet" "public_subnet" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-
   count                   = 2
   cidr_block              = var.public_subnets[count.index]
   availability_zone       = var.availability_zone[count.index]
   vpc_id                  = aws_vpc.my_vpc.id
   map_public_ip_on_launch = var.map_public_ip_on_launch
   tags = {
-    # Name = "${cidr_block}-${availability_zone.name}-${count.index+1}"
     Name = "public-subnet-${count.index + 1}"
   }
 }
@@ -41,13 +39,11 @@ resource "aws_subnet" "private_subnet" {
   depends_on = [
     aws_vpc.my_vpc,
   ]
-
   count             = 2
   cidr_block        = var.private_subnets[count.index]
   availability_zone = var.availability_zone[count.index]
   vpc_id            = aws_vpc.my_vpc.id
   tags = {
-    # Name = "${cidr_block}-${availability_zone.name}-${count.index+1}"
     Name = "private-subnet-${count.index + 1}"
   }
 }
@@ -68,12 +64,13 @@ resource "aws_route_table" "IG_route_table" {
     aws_vpc.my_vpc,
     aws_internet_gateway.igw
   ]
-
   vpc_id = aws_vpc.my_vpc.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
+
   tags = {
     Name = "${local.name_prefix}-IG-rt"
   }
@@ -85,7 +82,6 @@ resource "aws_route_table_association" "associate_routetable_to_public_subnet" {
     aws_subnet.public_subnet,
     aws_route_table.IG_route_table,
   ]
-
   count          = 2
   route_table_id = aws_route_table.IG_route_table.id
   subnet_id      = aws_subnet.public_subnet.*.id[count.index]
@@ -103,7 +99,6 @@ resource "aws_nat_gateway" "nat_gateway" {
     aws_subnet.public_subnet,
     aws_eip.elastic_ip,
   ]
-
   count         = 2
   allocation_id = aws_eip.elastic_ip.*.id[count.index]
   subnet_id     = aws_subnet.public_subnet.*.id[count.index]
@@ -119,9 +114,9 @@ resource "aws_route_table" "NAT_route_table" {
     aws_vpc.my_vpc,
     aws_nat_gateway.nat_gateway,
   ]
-
   vpc_id = aws_vpc.my_vpc.id
   count  = 2
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.nat_gateway.*.id[count.index]
