@@ -1,12 +1,9 @@
 locals {
-  my-instance-userdata = <<USERDATA
-#!/bin/bash
-
-sudo apt update -y
-sudo apt install nginx -y
-sed -i "s/nginx/Grandpa's Whiskey/g" /var/www/html/index.nginx-debian.html
-sed -i '15,23d' /var/www/html/index.nginx-debian.html
-service nginx restart
-
-USERDATA
+  my-instance-userdata = <<EOF
+#! /bin/bash
+sudo amazon-linux-extras install -y nginx1
+sudo service nginx start
+sudo rm /usr/share/nginx/html/index.html
+echo '<html><head><title>Taco Team Server</title></head><body style=\"background-color:#1F778D\"><p style=\"text-align: center;\"><span style=\"color:#FFFFFF;\"><span style=\"font-size:28px;\">You did it! Have a &#127790;</span></span></p></body></html>' | sudo tee /usr/share/nginx/html/index.html
+EOF
 }

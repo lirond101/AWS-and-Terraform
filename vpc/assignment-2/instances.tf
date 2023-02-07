@@ -13,36 +13,46 @@ data "aws_ssm_parameter" "ami" {
 # INSTANCES #
 resource "aws_instance" "nginx" {
   depends_on = [
-    aws_security_group.nginx-sg,
+    aws_security_group.nginx_sg,
   ]
+
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.private_subnet.*.id[count.index]
-  vpc_security_group_ids = [aws_security_group.nginx-sg.id]
+  subnet_id              = keys(module.my_vpc.vpc_private_subnets)[count.index]
+  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  associate_public_ip_address = "true"
   key_name               = var.key_name
-  user_data              = local.my-instance-userdata
-
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-nginx-${count.index + 1}"
+  iam_instance_profile   = module.web_app_s3.instance_profile.name
+  
+  provisioner "local-exec" {
+    command = "echo ${self.public_ip} >> nginx-${count.index+1}.txt"
+  }
+  user_data = templatefile("${path.module}/startup_script.tpl", {
+    public_ip = "${file("nginx-${count.index+1}.txt")}"
   })
+  
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-nginx-${count.index+1}"
+  })  
 }
+
 
 
 resource "aws_instance" "db" {
   depends_on = [
-    aws_security_group.db-sg,
-    aws_nat_gateway.nat_gateway,
-    aws_route_table_association.associate_routetable_to_private_subnet
+    aws_security_group.db_sg,
+    module.my_vpc
   ]
+
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.ami.value)
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.private_subnet.*.id[count.index]
-  vpc_security_group_ids = [aws_security_group.db-sg.id]
+  subnet_id              = keys(module.my_vpc.vpc_private_subnets)[count.index]
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
   key_name               = var.key_name
 
   tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-db-${count.index + 1}"
+    Name = "${local.name_prefix}-db-${count.index+1}"
   })
 }

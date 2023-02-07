@@ -72,12 +72,14 @@ variable "availability_zone" {
   type = list(string)
 }
 
-# key variable for refrencing 
 variable "key_name" {
-  default = "ec2Key"
+  type        = string
+  description = "key variable for refrencing"
+  default     = "ec2Key"
 }
 
-# base_path for refrencing 
 variable "base_path" {
-  default = "/home/ec2-user/Getting-Started-Terraform/check"
+  type        = string
+  description = "Base path for referencing"
+  default     = "/home/ec2-user/AWS-and-Terraform/vpc/assignment-1/"
 }
