@@ -14,14 +14,7 @@ resource "aws_lb" "nginx" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = keys(module.my_vpc.vpc_public_subnets)[*]
-
   enable_deletion_protection = false
-
-  access_logs {
-    bucket  = module.web_app_s3.web_bucket.id
-    prefix  = "alb-logs"
-    enabled = true
-  }
 
   tags = local.common_tags
 }

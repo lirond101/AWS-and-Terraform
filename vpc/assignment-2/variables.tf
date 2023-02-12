@@ -22,6 +22,27 @@ variable "instance_count" {
   default     = 2
 }
 
+variable "nginx_root_disk_size" {
+  description = "The size of the root disk"
+  default     = 10
+}
+
+variable "nginx_encrypted_disk_size" {
+  description = "The size of the secondary encrypted disk"
+  default     = 10
+}
+
+variable "nginx_encrypted_disk_device_name" {
+  description = "The name of the device of secondary encrypted disk"
+  default     = "xvdh"
+  type        = string
+}
+
+variable "volumes_type" {
+  description = "The type of all the disk instances in my project"
+  default     = "gp2"
+}
+
 variable "company" {
   type        = string
   description = "Company name for resource tagging"
@@ -65,8 +86,8 @@ variable "availability_zone" {
   description = "Desired AZs as list of strings"
 }
 
-variable "unique_id" {
+variable "s3_bucket_name" {
   type = string
-  description = "S3 bucket unique prefix"
-  default = "050220231138"
+  description = "Name of the S3 bucket to create"
+  default = "opsschool-lirondadon-nginx-access-log2"
 }
