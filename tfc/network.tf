@@ -12,7 +12,7 @@ data "aws_availability_zones" "available" {}
 
 # vpc
 module "my_vpc" {
-  source = "./modules/terraform-aws-vpc"
+  source = "https://github.com/lirond101/AWS-and-Terraform/tree/main/tfc/modules/terraform-aws-vpc"
 
   availability_zone = var.availability_zone
   public_subnets = var.public_subnets
