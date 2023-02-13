@@ -10,6 +10,12 @@ variable "naming_prefix" {
   default     = "vpc-assig"
 }
 
+variable "env_name" {
+  type        = string
+  description = "Name of environment it run on"
+  default     = "dev"
+}
+
 variable "instance_type" {
   type        = string
   description = "Type for EC2 Instance"
