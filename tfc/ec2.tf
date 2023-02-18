@@ -15,7 +15,8 @@ module "my_ec2" {
     module.my_vpc,
     module.web_app_s3
   ]
-  source = "https://github.com/lirond101/AWS-and-Terraform/tree/main/tfc/modules/terraform-aws-ec2"
+  source  = "app.terraform.io/opsschool-lirondadon/ec2/aws"
+  version = "1.0.0"
 
   instance_count_nginx         = var.instance_count
   instance_count_db            = var.instance_count
