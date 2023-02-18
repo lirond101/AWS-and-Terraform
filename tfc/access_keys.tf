@@ -18,5 +18,4 @@ resource "aws_key_pair" "key_pair" {
 resource "local_file" "saveKey" {
   content  = tls_private_key.private_key.private_key_pem
   filename = "${var.base_path}${var.key_name}.pem"
-
 }

@@ -68,13 +68,13 @@ variable "ubuntu_account_number" {
 variable "key_name" {
   type        = string
   description = "key variable for refrencing"
-  default     = "ec2Key2"
+  default     = "ec2Key3"
 }
 
 variable "base_path" {
   type        = string
   description = "Base path for referencing"
-  default     = "/home/ec2-user/AWS-and-Terraform/vpc/assignment-2/"
+  default     = "~/.ssh/"
 }
 
 variable "public_subnets" {

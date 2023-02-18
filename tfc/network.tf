@@ -20,6 +20,6 @@ module "my_vpc" {
 
   common_tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-vpc",
-    Version = "1.0.0"
+    Version = "v1.0.0"
   })
 }

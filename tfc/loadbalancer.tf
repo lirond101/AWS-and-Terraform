@@ -1,14 +1,8 @@
-##################################################################################
 # DATA
-##################################################################################
-
 data "aws_elb_service_account" "root" {}
 
-##################################################################################
-# RESOURCES
-##################################################################################
-
-resource "aws_lb" "nginx" {
+# ALB
+resource "aws_lb" "alb" {
   name               = "${local.name_prefix}-alb"
   internal           = false
   load_balancer_type = "application"
@@ -19,7 +13,7 @@ resource "aws_lb" "nginx" {
   tags = local.common_tags
 }
 
-resource "aws_lb_target_group" "nginx" {
+resource "aws_lb_target_group" "alb_target_group" {
   name     = "${local.name_prefix}-alb-tg"
   port     = 80
   protocol = "HTTP"
@@ -41,22 +35,52 @@ resource "aws_lb_target_group" "nginx" {
   }
 }
 
-resource "aws_lb_listener" "nginx" {
-  load_balancer_arn = aws_lb.nginx.arn
+resource "aws_lb_listener" "alb_listener" {
+  load_balancer_arn = aws_lb.alb.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.nginx.arn
+    target_group_arn = aws_lb_target_group.alb_target_group.arn
   }
 
   tags = local.common_tags
 }
 
-resource "aws_lb_target_group_attachment" "nginx" {
+resource "aws_lb_target_group_attachment" "alb_target_group_attachment" {
   count            = var.instance_count
-  target_group_arn = aws_lb_target_group.nginx.arn
-  target_id        = aws_instance.nginx[count.index].id
+  target_group_arn = aws_lb_target_group.alb_listener.arn
+  target_id        = module.my_ec2.aws_instance.nginx[count.index].id
   port             = 80
+}
+
+# ALB Security Group
+resource "aws_security_group" "alb_sg" {
+  depends_on = [
+    module.my_vpc,
+  ]
+  name   = "${local.name_prefix}-nginx_alb_sg"
+  vpc_id = module.my_vpc.vpc_id
+  tags = local.common_tags
+}
+
+resource "aws_security_group_rule" "allow_http" {
+ type              = "ingress"
+ description       = "HTTP ingress"
+ from_port         = 80
+ to_port           = 80
+ protocol          = "tcp"
+ cidr_blocks       = ["0.0.0.0/0"]
+ security_group_id = aws_security_group.alb_sg.id
+}
+
+resource "aws_security_group_rule" "alb_allow_all_outbound" {
+ type              = "egress"
+ description       = "outbound internet access"
+ from_port         = 0
+ to_port           = 0
+ protocol          = "-1"
+ cidr_blocks       = ["0.0.0.0/0"]
+ security_group_id = aws_security_group.alb_sg.id
 }
