@@ -16,8 +16,6 @@ module "my_ec2" {
     aws_iam_instance_profile.instance_profile
   ]
   source                       = "app.terraform.io/opsschool-lirondadon/ec2/aws"
-  # source                       = "./modules/terraform-aws-ec2"
-
   version                      = "1.0.1"
   
   #vpc
