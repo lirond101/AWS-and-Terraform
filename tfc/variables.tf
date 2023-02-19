@@ -1,3 +1,13 @@
+variable "AWS_ACCESS_KEY_ID" {
+  type        = string
+  description = "Access key from tfc"
+}
+
+variable "AWS_SECRET_ACCESS_KEY" {
+  type        = string
+  description = "Secret key from tfc"
+}
+
 variable "aws_region" {
   type        = string
   description = "Region for AWS Resources"
