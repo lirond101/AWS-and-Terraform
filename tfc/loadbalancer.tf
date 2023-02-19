@@ -54,7 +54,7 @@ resource "aws_lb_target_group_attachment" "alb_target_group_attachment" {
   ]
   count            = var.instance_count
   target_group_arn = aws_lb_target_group.alb_target_group.arn
-  target_id        = keys(module.my_ec2.aws_nginx_id)[count.index]
+  target_id        = module.my_ec2.aws_nginx_id[count.index]
   port             = 80
 }
 
