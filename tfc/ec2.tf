@@ -32,7 +32,6 @@ module "my_ec2" {
   instance_type_nginx              = var.instance_type
   iam_instance_profile_nginx       = aws_iam_instance_profile.instance_profile.name
   key_name                         = var.key_name
-  encrypted_disk_device_name_nginx = var.nginx_encrypted_disk_size
   user_data_nginx                  = templatefile("${path.module}/startup_script.tpl", {
                                       vpc_cidr_block = module.my_vpc.vpc_cidr_block
                                     })
