@@ -12,7 +12,7 @@ data "aws_availability_zones" "available" {}
 
 # vpc
 module "my_vpc" {
-  ource  = "app.terraform.io/opsschool-lirondadon/vpc/aws"
+  source  = "app.terraform.io/opsschool-lirondadon/vpc/aws"
   version = "1.0.0"
 
   availability_zone = var.availability_zone

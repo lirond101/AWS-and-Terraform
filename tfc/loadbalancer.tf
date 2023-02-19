@@ -49,9 +49,12 @@ resource "aws_lb_listener" "alb_listener" {
 }
 
 resource "aws_lb_target_group_attachment" "alb_target_group_attachment" {
+  depends_on = [
+    module.my_ec2,
+  ]
   count            = var.instance_count
-  target_group_arn = aws_lb_target_group.alb_listener.arn
-  target_id        = module.my_ec2.aws_instance.nginx[count.index].id
+  target_group_arn = aws_lb_target_group.alb_target_group.arn
+  target_id        = keys(module.my_ec2.aws_nginx_id)[count.index]
   port             = 80
 }
 

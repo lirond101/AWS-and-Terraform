@@ -13,25 +13,38 @@ data "aws_ami" "ubuntu-18" {
 module "my_ec2" {
     depends_on = [
     module.my_vpc,
-    module.web_app_s3
+    aws_iam_instance_profile.instance_profile
   ]
-  source  = "app.terraform.io/opsschool-lirondadon/ec2/aws"
-  version = "1.0.0"
+  source                       = "app.terraform.io/opsschool-lirondadon/ec2/aws"
+  # source                       = "./modules/terraform-aws-ec2"
 
-  instance_count_nginx         = var.instance_count
-  instance_count_db            = var.instance_count
-  ami                          = data.aws_ami.ubuntu-18.id
-  instance_type                = var.instance_type
-  nginx_iam_instance_profile   = module.web_app_s3.instance_profile.name
-  subnet_id_nginx              = keys(module.my_vpc.vpc_public_subnets)[count.index]
-  subnet_id_db                 = keys(module.my_vpc.vpc_private_subnets)[count.index]
+  version                      = "1.0.1"
+  
+  #vpc
+  vpc_id                           = module.my_vpc.vpc_id
+  vpc_cidr_block                   = module.my_vpc.vpc_cidr_block
+  vpc_public_subnets               = module.my_vpc.vpc_public_subnets
+  vpc_private_subnets              = module.my_vpc.vpc_private_subnets
 
-  user_data = templatefile("${path.module}/startup_script.tpl", {
-    vpc_cidr_block = module.my_vpc.vpc_cidr_block
-    })
+  # nginx
+  instance_count_nginx             = var.instance_count
+  ami_nginx                        = data.aws_ami.ubuntu-18.id
+  instance_type_nginx              = var.instance_type
+  iam_instance_profile_nginx       = aws_iam_instance_profile.instance_profile.name
+  key_name                         = var.key_name
+  encrypted_disk_device_name_nginx = var.nginx_encrypted_disk_size
+  user_data_nginx                  = templatefile("${path.module}/startup_script.tpl", {
+                                      vpc_cidr_block = module.my_vpc.vpc_cidr_block
+                                    })
+  
+  # db
+  instance_count_db                = var.instance_count
+  ami_db                           = data.aws_ami.ubuntu-18.id
+  instance_type_db                 = var.instance_type
 
-  common_tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-ec2",
-    Version = "v1.0.0"
-  })
+  naming_prefix                    = "tfc-assignment"
+  common_tags                      = merge(local.common_tags, {
+                                      Name = "${local.name_prefix}-ec2",
+                                      Version = "v1.0.0"
+                                    })
 }

@@ -1,6 +1,6 @@
 # S3 Bucket config
 resource "aws_iam_role" "allow_instance_s3" {
-  name = "${var.bucket_name}_allow_instance_s3"
+  name = "${var.s3_bucket_name}_allow_instance_s3"
 
   assume_role_policy = <<EOF
 {
@@ -25,12 +25,12 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "${var.bucket_name}_instance_profile"
+  name = "${var.s3_bucket_name}_instance_profile"
   role = aws_iam_role.allow_instance_s3.name
 }
 
 resource "aws_iam_role_policy" "allow_s3_all" {
-  name = "${var.bucket_name}_allow_all"
+  name = "${var.s3_bucket_name}_allow_all"
   role = aws_iam_role.allow_instance_s3.name
 
   policy = <<EOF
@@ -43,8 +43,8 @@ resource "aws_iam_role_policy" "allow_s3_all" {
       ],
       "Effect": "Allow",
       "Resource": [
-                "arn:aws:s3:::${var.bucket_name}",
-                "arn:aws:s3:::${var.bucket_name}/*"
+                "arn:aws:s3:::${var.s3_bucket_name}",
+                "arn:aws:s3:::${var.s3_bucket_name}/*"
             ]
     }
   ]
@@ -54,7 +54,7 @@ EOF
 }
 
 resource "aws_s3_bucket" "nginx_access_log" {
-  bucket = var.bucket_name
+  bucket = var.s3_bucket_name
   force_destroy = true
 
   tags = merge(local.common_tags, {
